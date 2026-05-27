@@ -1,0 +1,14 @@
+POST http://localhost:3000/api/v1/shooting/upload/prova-backend-2
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="photos"; filename="1.png"
+Content-Type: image/png
+
+< C:\Users\nicola\AppData\Roaming\PrismLauncher\instances\Fabulously Optimized(1)\minecraft\screenshots\2026-05-17_01.46.14.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="photos"; filename="2.png"
+Content-Type: image/png
+
+< C:\Users\nicola\AppData\Roaming\PrismLauncher\instances\Fabulously Optimized(1)\minecraft\screenshots\2026-05-18_21.39.11.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
