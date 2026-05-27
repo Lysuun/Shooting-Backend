@@ -138,6 +138,62 @@ async function getEventPhotosList(req, res) {
     }
 }
 
+// async function serveSinglePhoto(req, res) {
+//     const { photoId } = req.params;
+
+//     const query = `
+//         SELECT ep.photo_url, e.paid 
+//         FROM event_photos ep
+//         JOIN events e ON ep.event_uuid = e.uuid
+//         WHERE ep.id = ?
+//     `;
+
+//     try {
+//         const result = await db.execute({
+//             sql: query,
+//             args: [photoId]
+//         });
+
+//         if (result.rows.length === 0) {
+//             return res.status(404).send("Photo not found");
+//         }
+
+//         const { photo_url, paid } = result.rows[0];
+
+//         const response = await globalThis.fetch(photo_url);
+//         if (!response.ok) return res.status(500).send("Error fetching source image");
+        
+//         const imageBuffer = Buffer.from(await response.arrayBuffer());
+
+//         res.setHeader('Content-Type', response.headers.get('content-type') || 'image/png');
+        
+//         if (Number(paid) === 0) {
+//             const image = sharp(imageBuffer);
+//             const metadata = await image.metadata();
+
+//             const watermarkWidth = Math.floor(metadata.width * 0.20);
+//             const resizedWatermark = await sharp(PATH_TO_WATERMARK)
+//                 .resize({ width: watermarkWidth })
+//                 .toBuffer();
+
+//             const watermarkedBuffer = await image
+//                 .composite([{ 
+//                     input: resizedWatermark, 
+//                     tile: true,
+//                     blend: 'over' 
+//                 }])
+//                 .toBuffer();
+
+//             return res.send(watermarkedBuffer);
+//         }
+
+//         return res.send(imageBuffer);
+
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).send("Error processing image");
+//     }
+// }
 async function serveSinglePhoto(req, res) {
     const { photoId } = req.params;
 
@@ -165,8 +221,6 @@ async function serveSinglePhoto(req, res) {
         
         const imageBuffer = Buffer.from(await response.arrayBuffer());
 
-        res.setHeader('Content-Type', response.headers.get('content-type') || 'image/png');
-        
         if (Number(paid) === 0) {
             const image = sharp(imageBuffer);
             const metadata = await image.metadata();
@@ -182,19 +236,25 @@ async function serveSinglePhoto(req, res) {
                     tile: true,
                     blend: 'over' 
                 }])
+                .jpeg({ quality: 80, chromaSubsampling: '4:2:0' })
                 .toBuffer();
 
+            res.setHeader('Content-Type', 'image/jpeg');
             return res.send(watermarkedBuffer);
         }
 
-        return res.send(imageBuffer);
+        const optimizedCleanBuffer = await sharp(imageBuffer)
+            .jpeg({ quality: 90 }) 
+            .toBuffer();
+
+        res.setHeader('Content-Type', 'image/jpeg');
+        return res.send(optimizedCleanBuffer);
 
     } catch (error) {
-        console.error(error);
+        console.error("Errore durante il processing dell'immagine:", error);
         return res.status(500).send("Error processing image");
     }
 }
-
 async function markEventAsPaid(req, res) {
     const { uuid } = req.params;
 
